@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materi Kuliah - Pemrograman IV (SI-6502)</title>
+    <!-- Memuat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter untuk tampilan profesional -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Menggunakan font Inter sebagai default */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Slate 50 */
+            scroll-behavior: smooth;
+        }
+
+        /* Style kustom untuk "slide" materi */
+        .slide {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #3b82f6; /* Aksen biru di kiri */
+            border-radius: 0.5rem; 
+            padding: 2rem; 
+            margin-bottom: 2rem; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+        }
+
+        /* Nomor Slide badge */
+        .slide-number {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #f1f5f9;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+        }
+
+        /* Animasi fade-in */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Staggered animation delay untuk 20 slide (looping logic via CSS pre-processor would be better, manual here for vanilla CSS) */
+        .slide:nth-child(1) { animation-delay: 0.05s; }
+        .slide:nth-child(2) { animation-delay: 0.1s; }
+        .slide:nth-child(3) { animation-delay: 0.15s; }
+        .slide:nth-child(4) { animation-delay: 0.2s; }
+        .slide:nth-child(5) { animation-delay: 0.25s; }
+        /* ... delay sisanya dihandle generic atau dibiarkan cepat */
+
+        /* Judul slide */
+        .slide-title {
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: #1e3a8a; 
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* Sub-judul slide */
+        .slide-subtitle {
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            color: #2563eb; 
+            margin-top: 1.25rem; 
+            margin-bottom: 0.5rem; 
+        }
+
+        /* Konten paragraf */
+        .slide p, .slide li {
+            font-size: 1rem; 
+            line-height: 1.7; 
+            color: #334155; 
+            margin-bottom: 0.75rem;
+        }
+
+        .slide ul, .slide ol {
+            margin-left: 1.5rem; 
+            margin-bottom: 1rem;
+        }
+        
+        .slide ul { list-style-type: disc; }
+        .slide ol { list-style-type: decimal; }
+
+        /* Blok kode */
+        .slide pre {
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #334155;
+        }
+
+        .slide code {
+            background-color: #f1f5f9;
+            color: #ef4444;
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Kartu pertemuan */
+        .pertemuan-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .pertemuan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: #93c5fd;
+        }
+
+        /* Tombol navigasi */
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #2563eb;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 40;
+        }
+        
+        #back-to-top.visible { opacity: 1; }
+
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">SI</div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Pemrograman IV</h1>
+                        <p class="text-xs text-blue-600 font-semibold tracking-wide">MOBILE PROGRAMMING (REACT NATIVE)</p>
+                    </div>
+                </div>
+                <div class="text-right hidden sm:block">
+                    <span class="text-sm font-medium text-slate-500 block">Dosen Pengampu</span>
+                    <span class="text-sm font-semibold text-slate-700">Asep Trisna Setiawan, M.T.</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+
+        <!-- Tampilan Utama: Daftar Pertemuan -->
+        <section id="home-view">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">Daftar Materi Kuliah</h2>
+                <p class="text-slate-500 mt-2">Silakan pilih pertemuan untuk melihat slide materi lengkap (20 Slide per Pertemuan).</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Grid akan di-generate oleh JS untuk efisiensi kode, tapi untuk struktur dasar HTML tetap saya sediakan container -->
+            </div>
+        </section>
+
+        <!-- Tampilan Materi: Konten "Slide" (Awalnya tersembunyi) -->
+        <section id="materi-view" class="hidden max-w-4xl mx-auto pb-20">
+            <!-- Navigasi Atas -->
+            <div class="flex items-center justify-between mb-8 sticky top-24 z-30 bg-slate-50/90 py-4 backdrop-blur-sm border-b border-slate-200">
+                <button id="back-button" class="nav-btn text-blue-600 bg-blue-50 hover:bg-blue-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Daftar Materi
+                </button>
+                <div class="text-right">
+                    <h2 id="materi-title-sticky" class="text-lg font-bold text-slate-800"></h2>
+                    <p class="text-xs text-slate-500">20 Slide Materi</p>
+                </div>
+            </div>
+
+            <!-- Konten "Slide" Dinamis -->
+            <div id="materi-content">
+                <!-- Slide akan di-inject oleh JavaScript -->
+            </div>
+
+            <!-- Navigasi Bawah -->
+            <div class="mt-12 text-center border-t border-slate-200 pt-8">
+                <p class="text-slate-500 mb-4">Anda telah mencapai akhir materi pertemuan ini.</p>
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="nav-btn bg-slate-800 text-white hover:bg-slate-700">
+                    Kembali ke Atas
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Tombol Back to Top Floating -->
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Kembali ke atas">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <span class="font-bold text-slate-700">SI-6502</span>
+                    <span class="text-slate-500 mx-2">|</span>
+                    <span class="text-slate-600">Fakultas Ilmu Komputer</span>
+                </div>
+                <div class="text-sm text-slate-500">
+                    &copy; 2025 Universitas Bandar Lampung. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logika JavaScript -->
+    <script>
+        // --- Database Konten Materi Lengkap (20 Slide per Pertemuan) ---
+        // Data ini mencakup 16 pertemuan dengan detail mendalam.
+        
+        const generateSlides = (topic, startSlide = 1) => {
+            // Helper function to create generic slides if needed, 
+            // but we will hardcode specific content below for quality.
+        };
+
+        const materiData = {
+            "1": {
+                title: "Pertemuan 1: Pendahuluan & Ekosistem React Native",
+                desc: "Pengenalan konsep cross-platform, sejarah React Native, dan persiapan lingkungan kerja.",
+                slides: [
+                    { title: "1. Kontrak Kuliah", content: "<ul><li>Kehadiran minimal 75%.</li><li>Toleransi keterlambatan 15 menit.</li><li>Komposisi Nilai: Tugas (20%), Kuis (10%), UTS (30%), UAS (40%).</li><li>Software wajib: Node.js, VS Code, Android Studio (opsional untuk emulator).</li></ul>" },
+                    { title: "2. Evolusi Pengembangan Mobile", content: "<p>Sejarah perpindahan dari Native (Java/Swift) ke Hybrid (PhoneGap/Cordova) berbasis WebView, hingga ke Cross-Platform Native (React Native/Flutter) yang merender komponen native asli.</p>" },
+                    { title: "3. Apa itu React Native?", content: "<p>Framework open-source ciptaan Facebook (Meta) yang memungkinkan pembuatan aplikasi mobile (iOS & Android) menggunakan JavaScript dan React.</p>" },
+                    { title: "4. Mengapa React Native?", content: "<ul><li><strong>Learn Once, Write Anywhere:</strong> Gunakan konsep React yang sama untuk berbagai platform.</li><li><strong>Native Performance:</strong> Bukan WebView, melainkan merender komponen UI asli OS.</li><li><strong>Hot Reloading:</strong> Melihat perubahan kode secara instan tanpa build ulang.</li></ul>" },
+                    { title: "5. Konsep: Native vs Hybrid vs Cross-Platform", content: "<p>Perbedaan mendasar dalam akses API perangkat, performa rendering, dan bahasa pemrograman yang digunakan.</p>" },
+                    { title: "6. Arsitektur: The Bridge (Old)", content: "<p>Arsitektur lama menggunakan jembatan asinkron untuk komunikasi serialisasi JSON antara thread JavaScript dan thread Native (UI/Main).</p>" },
+                    { title: "7. Arsitektur: JSI (New)", content: "<p>JavaScript Interface (JSI) memungkinkan JavaScript memanggil fungsi C++ secara langsung dan sinkron, meningkatkan performa secara drastis.</p>" },
+                    { title: "8. Prasyarat: Node.js", content: "<p>Node.js adalah runtime JavaScript. Diperlukan untuk menjalankan package manager (NPM/Yarn) dan Metro Bundler.</p><pre>node -v</pre>" },
+                    { title: "9. Prasyarat: JDK (Java Development Kit)", content: "<p>Diperlukan untuk mengkompilasi kode Android. Disarankan menggunakan JDK 11 atau 17 (LTS).</p>" },
+                    { title: "10. Expo vs React Native CLI", content: "<ul><li><strong>Expo:</strong> Setup mudah, tidak butuh Android Studio awal, banyak library bawaan. Cocok untuk pemula.</li><li><strong>CLI:</strong> Kontrol penuh ke native code, setup lebih rumit. Cocok untuk integrasi module native khusus.</li></ul>" },
+                    { title: "11. Instalasi Expo CLI", content: "<p>Instalasi global expo-cli (opsional di versi baru) atau menggunakan npx.</p><pre>npm install -g expo-cli</pre>" },
+                    { title: "12. Membuat Proyek Pertama", content: "<p>Perintah untuk inisialisasi proyek baru.</p><pre>npx create-expo-app my-first-app</pre>" },
+                    { title: "13. Struktur Folder Proyek", content: "<ul><li><code>App.js</code>: Entry point aplikasi.</li><li><code>assets/</code>: Gambar dan font.</li><li><code>node_modules/</code>: Pustaka dependensi.</li><li><code>package.json</code>: Metadata proyek dan skrip.</li></ul>" },
+                    { title: "14. Menjalankan Aplikasi", content: "<p>Menjalankan development server (Metro Bundler).</p><pre>npx expo start</pre>" },
+                    { title: "15. Expo Go App", content: "<p>Aplikasi mobile (tersedia di PlayStore/AppStore) untuk menjalankan preview aplikasi React Native tanpa perlu kabel USB atau Android Studio saat pengembangan.</p>" },
+                    { title: "16. Menggunakan Emulator Android", content: "<p>Konfigurasi AVD (Android Virtual Device) di Android Studio untuk menjalankan aplikasi di komputer.</p>" },
+                    { title: "17. Dasar Debugging", content: "<p>Mengakses Developer Menu (Shake device atau Cmd+D / Ctrl+M). Fitur: Reload, Toggle Inspector.</p>" },
+                    { title: "18. Console.log & Terminal", content: "<p>Melihat output log JavaScript langsung di terminal tempat `npx expo start` dijalankan.</p>" },
+                    { title: "19. Masalah Umum Instalasi", content: "<p>Environment variables (JAVA_HOME, ANDROID_HOME) yang belum diset sering menjadi penyebab error utama.</p>" },
+                    { title: "20. Tugas Pertemuan 1", content: "<p>1. Instal Node.js dan Expo.<br>2. Buat project 'HelloWorld'.<br>3. Ubah teks default menjadi 'Nama - NPM' Anda.<br>4. Screenshot hasil di HP/Emulator.</p>" }
+                ]
+            },
+            "2": {
+                title: "Pertemuan 2: Dasar JavaScript (ES6+) & React",
+                desc: "Fondasi sintaks modern JavaScript dan konsep komponen React.",
+                slides: [
+                    { title: "1. Pentingnya ES6 (ECMAScript 2015)", content: "<p>Standar JavaScript modern yang digunakan secara ekstensif dalam ekosistem React. Browser/Runtime lama mungkin butuh Babel, tapi RN mendukungnya secara native (via Metro).</p>" },
+                    { title: "2. Variabel: var vs let vs const", content: "<p>Hindari <code>var</code>. Gunakan <code>const</code> untuk nilai tetap, dan <code>let</code> untuk nilai yang berubah. Ini membantu manajemen memori dan scope.</p>" },
+                    { title: "3. Arrow Functions", content: "<p>Sintaks ringkas untuk fungsi. Penting karena `this` binding-nya leksikal (tidak berubah konteks).</p><pre>const tambah = (a, b) => a + b;</pre>" },
+                    { title: "4. Template Literals", content: "<p>Menggabungkan string dengan variabel menggunakan backticks.</p><pre>`Halo, nama saya ${nama}`</pre>" },
+                    { title: "5. Destructuring Objects", content: "<p>Mengekstrak properti objek ke variabel.</p><pre>const { nama, umur } = mahasiswa;</pre>" },
+                    { title: "6. Destructuring Arrays", content: "<p>Mengekstrak elemen array.</p><pre>const [satu, dua] = angka;</pre>" },
+                    { title: "7. Spread Operator (...)", content: "<p>Menyalin atau menggabungkan objek/array tanpa memutasi aslinya (Immutability).</p><pre>const newObj = { ...oldObj, status: 'active' };</pre>" },
+                    { title: "8. Modul: Import & Export", content: "<p>Memecah kode ke banyak file. <code>export default</code> untuk satu komponen utama, <code>export</code> untuk utilitas.</p>" },
+                    { title: "9. Array Methods: .map()", content: "<p>Mengubah setiap elemen array. Sering digunakan di React untuk merender list komponen.</p>" },
+                    { title: "10. Array Methods: .filter()", content: "<p>Menyaring elemen array berdasarkan kondisi tertentu.</p>" },
+                    { title: "11. Konsep React: Component Based", content: "<p>UI dipecah menjadi bagian kecil (Header, Button, Card) yang independen dan dapat digunakan ulang (Reusable).</p>" },
+                    { title: "12. Functional Components", content: "<p>Komponen modern menggunakan fungsi, bukan Class.</p><pre>export default function App() { return <Text>Hi</Text>; }</pre>" },
+                    { title: "13. JSX (JavaScript XML)", content: "<p>Sintaks seperti HTML di dalam JS. Aturan: Harus ada satu parent element pembungkus, tag harus ditutup.</p>" },
+                    { title: "14. JSX Expressions", content: "<p>Menulis logika JS di dalam JSX menggunakan kurung kurawal <code>{}</code>.</p>" },
+                    { title: "15. Styling di JSX", content: "<p>Style bukan string CSS, tapi Object JavaScript. Gunakan camelCase (<code>backgroundColor</code> bukan <code>background-color</code>).</p>" },
+                    { title: "16. Props (Properties)", content: "<p>Data yang dikirim dari Parent ke Child. Props bersifat Read-Only (tidak bisa diubah oleh Child).</p>" },
+                    { title: "17. Children Prop", content: "<p>Prop spesial untuk konten yang berada di antara tag pembuka dan penutup komponen.</p>" },
+                    { title: "18. Conditional Rendering", content: "<p>Menampilkan komponen berdasarkan kondisi.</p><pre>{isLogin ? <Home /> : <Login />}</pre>" },
+                    { title: "19. Ternary Operator", content: "<p>Sering digunakan untuk logika if-else sederhana di dalam JSX.</p>" },
+                    { title: "20. Tugas Pertemuan 2", content: "<p>Buat komponen `KartuMahasiswa` yang menerima props (nama, npm, jurusan) dan tampilkan 3 kartu berbeda di `App.js`.</p>" }
+                ]
+            },
+            "3": {
+                title: "Pertemuan 3: Core Components & Layouting",
+                desc: "Mengenal komponen bawaan React Native dan sistem tata letak Flexbox.",
+                slides: [
+                    { title: "1. Core Components", content: "<p>Komponen siap pakai yang disediakan React Native yang memetakan langsung ke Native UI Platform.</p>" },
+                    { title: "2. View", content: "<p>Kontainer dasar (mirip `div` di HTML). Mendukung layout Flexbox, styling, dan touch handling dasar.</p>" },
+                    { title: "3. Text", content: "<p>Komponen wajib untuk menampilkan teks. Teks di RN tidak bisa berdiri sendiri tanpa dibungkus komponen ini.</p>" },
+                    { title: "4. Image", content: "<p>Menampilkan gambar. Sumber bisa dari aset lokal (`require`) atau remote URL (`{uri: ...}`).</p>" },
+                    { title: "5. ImageBackground", content: "<p>Komponen khusus untuk meletakkan konten di atas gambar latar belakang.</p>" },
+                    { title: "6. ScrollView", content: "<p>Wadah scrollable sederhana. Catatan: Merender semua anak sekaligus (kurang efisien untuk list panjang).</p>" },
+                    { title: "7. TextInput", content: "<p>Komponen input keyboard. Mendukung properti seperti `placeholder`, `secureTextEntry`, `keyboardType`.</p>" },
+                    { title: "8. StyleSheet", content: "<p>Abstraksi mirip CSS untuk styling. Menggunakan `StyleSheet.create` meningkatkan performa dengan memvalidasi style di awal.</p>" },
+                    { title: "9. Konsep Flexbox", content: "<p>Algoritma layout utama di RN. Didesain untuk konsistensi layout di berbagai ukuran layar.</p>" },
+                    { title: "10. Flex Direction", content: "<p><code>column</code> (default di RN, beda dengan web) vs <code>row</code>. Menentukan sumbu utama (Main Axis).</p>" },
+                    { title: "11. Main Axis vs Cross Axis", content: "<p>Memahami sumbu sangat penting untuk alignment.</p>" },
+                    { title: "12. Justify Content", content: "<p>Mengatur distribusi spasi di <strong>Main Axis</strong>. (flex-start, center, flex-end, space-between, space-around).</p>" },
+                    { title: "13. Align Items", content: "<p>Mengatur posisi anak di <strong>Cross Axis</strong>. (stretch, flex-start, center, flex-end).</p>" },
+                    { title: "14. Flex Property", content: "<p>Nilai angka (misal `flex: 1`) yang menentukan rasio ruang yang diambil komponen relatif terhadap saudaranya.</p>" },
+                    { title: "15. Absolute vs Relative Positioning", content: "<p><code>position: 'absolute'</code> melepaskan elemen dari aliran normal layout.</p>" },
+                    { title: "16. Margin & Padding", content: "<p>Spasi luar dan dalam. Mendukung properti spesifik: `marginHorizontal`, `paddingVertical`.</p>" },
+                    { title: "17. Dimensions API", content: "<p>Mengambil lebar dan tinggi layar perangkat secara dinamis.</p><pre>const {width} = Dimensions.get('window');</pre>" },
+                    { title: "18. Platform Specific Code", content: "<p>Menyesuaikan style berdasarkan OS (iOS vs Android) menggunakan `Platform.select` atau `Platform.OS`.</p>" },
+                    { title: "19. Studi Kasus Layout", content: "<p>Menganalisis layout Instagram Profile: Header (Row), Bio (Column), Grid Foto (Flex Wrap).</p>" },
+                    { title: "20. Tugas Pertemuan 3", content: "<p>Desain ulang tampilan halaman Login aplikasi populer (misal: Twitter/X) menggunakan View, Text, Image, TextInput, dan Flexbox seakurat mungkin.</p>" }
+                ]
+            },
+            "4": {
+                title: "Pertemuan 4: Manajemen State dengan Hooks",
+                desc: "Mengelola data dinamis dan siklus hidup komponen.",
+                slides: [
+                    { title: "1. Apa itu State?", content: "<p>Data internal yang 'hidup' di dalam komponen. Ketika state berubah, React merender ulang (re-render) komponen untuk memperbarui UI.</p>" },
+                    { title: "2. Props vs State", content: "<p>Props: Data dari luar (Parent), Read-only. State: Data internal, Mutable (bisa diubah), Private.</p>" },
+                    { title: "3. Pengenalan Hooks", content: "<p>Fitur di React 16.8+ yang memungkinkan penggunaan state di Functional Components.</p>" },
+                    { title: "4. useState Hook", content: "<p>Hook dasar untuk membuat variabel reactive.</p><pre>const [count, setCount] = useState(0);</pre>" },
+                    { title: "5. Aturan Hooks", content: "<p>1. Hanya panggil di tingkat teratas (jangan dalam loop/if).<br>2. Hanya panggil di Fungsi React.</p>" },
+                    { title: "6. Mengubah State", content: "<p>Jangan ubah variabel langsung (<code>count = 5</code>). Gunakan setter (<code>setCount(5)</code>) agar UI terupdate.</p>" },
+                    { title: "7. State Object", content: "<p>Mengelola state yang kompleks berupa objek. Hati-hati saat update, gunakan spread operator untuk menjaga properti lain.</p>" },
+                    { title: "8. State Array", content: "<p>Menambah item ke array state.</p><pre>setItems([...items, newItem])</pre>" },
+                    { title: "9. Two-way Binding (Input)", content: "<p>Menghubungkan nilai TextInput dengan state.</p><pre>value={text} onChangeText={setText}</pre>" },
+                    { title: "10. useEffect Hook", content: "<p>Menangani 'Side Effects': Fetching data, subscription, timer, atau manipulasi DOM manual.</p>" },
+                    { title: "11. Lifecycle: ComponentDidMount", content: "<p><code>useEffect(() => {}, [])</code>. Berjalan sekali setelah render pertama. Cocok untuk API call awal.</p>" },
+                    { title: "12. Lifecycle: ComponentDidUpdate", content: "<p><code>useEffect(() => {}, [prop])</code>. Berjalan setiap kali variabel di dalam array dependency berubah.</p>" },
+                    { title: "13. Lifecycle: ComponentWillUnmount", content: "<p>Return function di dalam useEffect. Digunakan untuk cleanup (hapus interval, unsubscribe event).</p>" },
+                    { title: "14. Studi Kasus: Counter App", content: "<p>Membuat aplikasi penghitung sederhana dengan tombol tambah, kurang, dan reset.</p>" },
+                    { title: "15. Asynchronous State Updates", content: "<p>Update state tidak selalu instan (di-batch oleh React). Gunakan fungsi callback jika update bergantung nilai sebelumnya.</p><pre>setCount(prev => prev + 1)</pre>" },
+                    { title: "16. Custom Hooks", content: "<p>Mengekstrak logika state ke fungsi terpisah agar bisa digunakan ulang (misal: `useFormInput`).</p>" },
+                    { title: "17. Masalah Infinite Loop", content: "<p>Bahaya jika lupa array dependency di useEffect saat melakukan set state di dalamnya.</p>" },
+                    { title: "18. Debugging State", content: "<p>Menggunakan React Developer Tools untuk memantau perubahan state secara realtime.</p>" },
+                    { title: "19. Lifting State Up", content: "<p>Memindahkan state ke parent terdekat jika data dibutuhkan oleh beberapa komponen child (sibling).</p>" },
+                    { title: "20. Tugas Pertemuan 4", content: "<p>Buat aplikasi 'Stopwatch' sederhana dengan tombol Start, Stop, dan Reset menggunakan useState dan useEffect (setInterval).</p>" }
+                ]
+            },
+            "5": {
+                title: "Pertemuan 5: Interaktivitas & List",
+                desc: "Menangani interaksi pengguna dan menampilkan data dalam jumlah banyak.",
+                slides: [
+                    { title: "1. Handling Touches", content: "<p>Menangani sentuhan di layar mobile. Berbeda dengan 'click' di web.</p>" },
+                    { title: "2. Button Component", content: "<p>Komponen tombol dasar. Tampilannya sangat native dan berbeda antara iOS (hanya teks) dan Android (background solid).</p>" },
+                    { title: "3. TouchableOpacity", content: "<p>Wrapper yang mengurangi opasitas saat ditekan. Paling umum digunakan untuk membuat tombol kustom.</p>" },
+                    { title: "4. TouchableHighlight", content: "<p>Wrapper yang mengubah warna background (underlay) saat ditekan.</p>" },
+                    { title: "5. Pressable (API Baru)", content: "<p>Komponen sentuh yang lebih modern dan fleksibel, mendeteksi state (pressed, hovered) untuk styling dinamis.</p>" },
+                    { title: "6. Handling Text Input", content: "<p>Event <code>onChangeText</code>, <code>onSubmitEditing</code>, dan properti fokus keyboard.</p>" },
+                    { title: "7. KeyboardAvoidingView", content: "<p>Komponen penting agar input tidak tertutup keyboard saat mengetik di layar kecil.</p>" },
+                    { title: "8. Masalah ScrollView untuk List", content: "<p>ScrollView merender SEMUA anak seketika. Jika data ada 1000, aplikasi akan crash atau lambat (performance issue).</p>" },
+                    { title: "9. FlatList: Solusi List", content: "<p>Hanya merender item yang terlihat di layar (Lazy Rendering). Sangat efisien memori.</p>" },
+                    { title: "10. FlatList: Data Prop", content: "<p>Menerima array data sebagai sumber.</p>" },
+                    { title: "11. FlatList: RenderItem", content: "<p>Fungsi yang mendefinisikan tampilan untuk SATU baris data.</p>" },
+                    { title: "12. FlatList: KeyExtractor", content: "<p>Penting! Menentukan ID unik untuk setiap item agar React bisa mengelola re-render dengan efisien.</p>" },
+                    { title: "13. FlatList: ItemSeparatorComponent", content: "<p>Menambah garis pembatas antar item secara otomatis.</p>" },
+                    { title: "14. FlatList: ListEmptyComponent", content: "<p>Tampilan yang muncul jika array data kosong (misal: 'Tidak ada data').</p>" },
+                    { title: "15. SectionList", content: "<p>Varian list untuk data yang dikelompokkan (misal: Daftar Kontak berdasarkan abjad A, B, C).</p>" },
+                    { title: "16. Pull to Refresh", content: "<p>Fitur standar mobile. Gunakan props <code>onRefresh</code> dan <code>refreshing</code> pada FlatList.</p>" },
+                    { title: "17. Horizontal List", content: "<p>Membuat carousel/slider sederhana dengan <code>horizontal={true}</code> pada FlatList.</p>" },
+                    { title: "18. Optimasi List", content: "<p>Penggunaan <code>getItemLayout</code> dan <code>initialNumToRender</code> untuk list super cepat.</p>" },
+                    { title: "19. Studi Kasus: WhatsApp Chat List", content: "<p>Menganalisis struktur data dan tampilan list chat WhatsApp (Avatar, Nama, Pesan Terakhir, Jam).</p>" },
+                    { title: "20. Tugas Pertemuan 5", content: "<p>Buat aplikasi 'Daftar Teman'. Gunakan FlatList untuk menampilkan 20 data dummy. Tambahkan fitur Pull to Refresh.</p>" }
+                ]
+            },
+            "6": {
+                title: "Pertemuan 6: Navigasi Dasar (Stack)",
+                desc: "Berpindah antar layar menggunakan React Navigation.",
+                slides: [
+                    { title: "1. Konsep SPA di Mobile", content: "<p>Aplikasi mobile sebenarnya hanya satu activity/window, navigasi hanyalah ilusi menukar komponen UI.</p>" },
+                    { title: "2. React Navigation Library", content: "<p>Standar industri untuk routing di React Native. Perlu instalasi paket inti dan dependensi native (screens, safe-area).</p>" },
+                    { title: "3. Instalasi Dependensi", content: "<p><code>npm install @react-navigation/native react-native-screens ...</code></p>" },
+                    { title: "4. NavigationContainer", content: "<p>Komponen pembungkus utama yang harus ada di root aplikasi (App.js) untuk mengelola state navigasi tree.</p>" },
+                    { title: "5. Stack Navigator", content: "<p>Model navigasi tumpukan kartu (LIFO). Layar baru menimpa layar lama. Layar lama tetap ada di memori di bawahnya.</p>" },
+                    { title: "6. createStackNavigator", content: "<p>Fungsi factory untuk membuat objek Stack.</p>" },
+                    { title: "7. Mendaftarkan Screen", content: "<p><code>Stack.Screen</code> mendefinisikan nama rute dan komponen yang akan dirender.</p>" },
+                    { title: "8. Prop `navigation`", content: "<p>Otomatis disuntikkan ke setiap komponen yang terdaftar di Stack.Screen.</p>" },
+                    { title: "9. Pindah Layar: navigate()", content: "<p><code>navigation.navigate('NamaRoute')</code>. Jika sudah di layar tersebut, tidak melakukan apa-apa.</p>" },
+                    { title: "10. Pindah Layar: push()", content: "<p><code>navigation.push('NamaRoute')</code>. Selalu menambah layar baru ke tumpukan (bisa duplikat layar yang sama).</p>" },
+                    { title: "11. Kembali: goBack()", content: "<p>Programmatic back button. Menghapus layar teratas dari tumpukan.</p>" },
+                    { title: "12. Header Bar", content: "<p>Stack Navigator menyediakan header bar bawaan (Judul & tombol Back). Bisa dikustomisasi.</p>" },
+                    { title: "13. Kustomisasi Header", content: "<p>Menggunakan `options` pada Stack.Screen (title, headerStyle, headerTintColor).</p>" },
+                    { title: "14. Mengirim Params", content: "<p>Kirim data antar layar. <code>navigate('Detail', { id: 1 })</code>.</p>" },
+                    { title: "15. Menerima Params", content: "<p>Gunakan prop `route`. <code>const { id } = route.params;</code>.</p>" },
+                    { title: "16. Header Button", content: "<p>Menambah tombol di kanan header (misal: tombol Save atau Edit) lewat options.</p>" },
+                    { title: "17. Screen Lifecycle", content: "<p><code>useFocusEffect</code>. Mendeteksi kapan layar aktif (fokus) atau ditinggalkan (blur).</p>" },
+                    { title: "18. Nesting Navigators", content: "<p>Konsep menaruh Navigator di dalam Navigator lain (Akan dibahas lebih dalam nanti).</p>" },
+                    { title: "19. Type Checking", content: "<p>Pentingnya TypeScript di navigasi untuk mencegah typo nama rute (Opsional tapi disarankan).</p>" },
+                    { title: "20. Tugas Pertemuan 6", content: "<p>Buat aplikasi 2 layar: 'Home' dan 'Detail'. Home berisi list judul artikel. Klik judul -> Buka Detail yang menampilkan isi artikel sesuai ID yang dikirim.</p>" }
+                ]
+            },
+            "7": {
+                title: "Pertemuan 7: Navigasi Lanjutan (Tab & Drawer)",
+                desc: "Struktur navigasi kompleks dengan Tab Bar dan Side Menu.",
+                slides: [
+                    { title: "1. Tipe Navigasi Aplikasi", content: "<p>Hierarki (Stack) vs Paralel (Tabs/Drawer). Sebagian besar aplikasi menggunakan kombinasi keduanya.</p>" },
+                    { title: "2. Bottom Tabs Navigator", content: "<p>Navigasi menu di bawah layar. Paling umum digunakan (Instagram, Gojek, Shopee).</p>" },
+                    { title: "3. Instalasi Bottom Tabs", content: "<p><code>@react-navigation/bottom-tabs</code>.</p>" },
+                    { title: "4. Konfigurasi Tab Bar", content: "<p>Menambahkan ikon (misal: Ionicons) dan label pada tab bar options.</p>" },
+                    { title: "5. Active vs Inactive State", content: "<p>Mengubah warna ikon/teks saat tab sedang dipilih vs tidak dipilih.</p>" },
+                    { title: "6. Tab Badges", content: "<p>Menampilkan notifikasi angka di ikon tab (misal: jumlah pesan belum dibaca).</p>" },
+                    { title: "7. Drawer Navigator", content: "<p>Menu samping yang bisa digeser (Slide out). Populer di aplikasi Gmail atau Dashboard Admin.</p>" },
+                    { title: "8. Instalasi Drawer", content: "<p>Membutuhkan `react-native-gesture-handler` dan `react-native-reanimated`.</p>" },
+                    { title: "9. Custom Drawer Content", content: "<p>Membuat tampilan menu drawer sendiri (misal: menambah foto profil user di atas menu).</p>" },
+                    { title: "10. Material Top Tabs", content: "<p>Tab navigasi di bagian atas layar. Bisa digeser (swipeable). Contoh: WhatsApp (Chat/Status/Calls).</p>" },
+                    { title: "11. Nesting: Stack dalam Tab", content: "<p>Pola umum: Tab A berisi Stack Navigator sendiri. Saat user di Tab Home -> klik Detail, tab bar tetap ada atau hilang.</p>" },
+                    { title: "12. Hiding Tab Bar", content: "<p>Trik menyembunyikan tab bar saat masuk ke layar detail yang dalam.</p>" },
+                    { title: "13. Authentication Flow", content: "<p>Logika switch navigator: Jika belum login -> AuthStack (Login/Register). Jika sudah -> AppStack (Home/Profile).</p>" },
+                    { title: "14. Deep Linking", content: "<p>Membuka layar spesifik di aplikasi melalui URL eksternal (misal: `myapp://product/123`).</p>" },
+                    { title: "15. Navigation Themes", content: "<p>Mengatur Dark Mode / Light Mode secara global di navigasi.</p>" },
+                    { title: "16. Screen Options Group", content: "<p>Menerapkan style header yang sama ke semua screen dalam satu grup.</p>" },
+                    { title: "17. Reset History", content: "<p><code>navigation.reset()</code>. Menghapus history navigasi (misal: setelah Logout, user tidak bisa back ke Home).</p>" },
+                    { title: "18. Struktur Proyek Navigasi", content: "<p>Memisahkan file `AppNavigator.js`, `AuthNavigator.js`, dan `TabNavigator.js` agar rapi.</p>" },
+                    { title: "19. Common Mistakes", content: "<p>Nesting yang terlalu dalam atau salah menaruh NavigationContainer (harus cuma 1).</p>" },
+                    { title: "20. Tugas Pertemuan 7", content: "<p>Gabungkan Stack dan Tab. Buat Tab: Home, Profile. Di Home ada tombol ke Detail (Stack). Di Profile ada tombol Logout.</p>" }
+                ]
+            },
+            "8": {
+                title: "Pertemuan 8: Ujian Tengah Semester (UTS)",
+                desc: "Evaluasi pemahaman materi Pertemuan 1-7.",
+                slides: [
+                    { title: "1. Format Ujian", content: "<p>Sifat: Take Home Project / Coding On-site (Tergantung kebijakan kelas).</p>" },
+                    { title: "2. Materi: Setup & Dasar", content: "<p>Review instalasi, struktur folder, dan debugging.</p>" },
+                    { title: "3. Materi: Komponen UI", content: "<p>Review penggunaan View, Text, Image, TextInput, ScrollView.</p>" },
+                    { title: "4. Materi: Styling Layout", content: "<p>Review Flexbox (justifyContent, alignItems, flexDirection) dan Box Model.</p>" },
+                    { title: "5. Materi: State & Props", content: "<p>Review aliran data, useState, dan komunikasi parent-child.</p>" },
+                    { title: "6. Materi: List Data", content: "<p>Review implementasi FlatList dan array mapping.</p>" },
+                    { title: "7. Materi: Navigasi", content: "<p>Review Stack dan Tab navigation.</p>" },
+                    { title: "8. Soal Teori 1", content: "<p>Jelaskan siklus hidup komponen React (Mount, Update, Unmount) dalam konteks Hooks!</p>" },
+                    { title: "9. Soal Teori 2", content: "<p>Apa perbedaan ScrollView dan FlatList? Kapan harus menggunakan masing-masing?</p>" },
+                    { title: "10. Soal Teori 3", content: "<p>Jelaskan konsep Immutability pada State React!</p>" },
+                    { title: "11. Studi Kasus Kode 1", content: "<p>Diberikan kode snippet error (misal: state diubah langsung), mahasiswa diminta memperbaiki.</p>" },
+                    { title: "12. Studi Kasus Kode 2", content: "<p>Membuat layout Flexbox berdasarkan gambar wireframe yang diberikan.</p>" },
+                    { title: "13. Project UTS: Kriteria", content: "<p>Aplikasi minimal memiliki 3-4 layar, menggunakan Navigasi, List Data, dan setidaknya 1 Form Input.</p>" },
+                    { title: "14. Penilaian: Fungsionalitas", content: "<p>Apakah aplikasi berjalan tanpa crash? Apakah fitur bekerja sesuai soal?</p>" },
+                    { title: "15. Penilaian: Kerapian Kode", content: "<p>Penamaan variabel, indentasi, pemisahan komponen.</p>" },
+                    { title: "16. Penilaian: UI/UX", content: "<p>Estetika desain dan kemudahan penggunaan.</p>" },
+                    { title: "17. Pengumpulan", content: "<p>Format: Link GitHub Repository dan Video Demo singkat.</p>" },
+                    { title: "18. Tips Pengerjaan", content: "<p>Kerjakan fitur utama dulu (MVP), baru styling detail.</p>" },
+                    { title: "19. Larangan", content: "<p>Plagiarisme kode sesama mahasiswa (Copy Paste mentah).</p>" },
+                    { title: "20. Doa & Penutup", content: "<p>Semoga sukses mengerjakan UTS!</p>" }
+                ]
+            },
+            "9": {
+                title: "Pertemuan 9: Pengantar REST API & Networking",
+                desc: "Memahami konsep komunikasi data antara aplikasi mobile dan server.",
+                slides: [
+                    { title: "1. Apa itu API?", content: "<p>Application Programming Interface. Jembatan komunikasi antar software. Mobile App butuh data dari Server.</p>" },
+                    { title: "2. Arsitektur Client-Server", content: "<p>Client (HP) me-request data, Server memproses dan mengirim response.</p>" },
+                    { title: "3. REST (Representational State Transfer)", content: "<p>Standar arsitektur web service paling populer. Menggunakan HTTP Protocol.</p>" },
+                    { title: "4. Format Data JSON", content: "<p>JavaScript Object Notation. Format teks ringan untuk pertukaran data. Mudah dibaca manusia dan mesin.</p>" },
+                    { title: "5. HTTP Methods (Verbs)", content: "<p>GET (Ambil), POST (Kirim/Buat), PUT (Update Total), PATCH (Update Parsial), DELETE (Hapus).</p>" },
+                    { title: "6. HTTP Status Codes", content: "<p>200 (OK), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 404 (Not Found), 500 (Server Error).</p>" },
+                    { title: "7. Endpoint URL", content: "<p>Alamat spesifik resource di server. Contoh: <code>https://api.myshop.com/products</code>.</p>" },
+                    { title: "8. HTTP Headers", content: "<p>Metadata request. Contoh: `Content-Type: application/json` atau `Authorization: Bearer token123`.</p>" },
+                    { title: "9. Tools: Postman / Insomnia", content: "<p>Wajib dikuasai! Tool untuk menguji API endpoint sebelum coding di aplikasi.</p>" },
+                    { title: "10. Public API Gratis", content: "<p>Resource belajar: JSONPlaceholder, PokeAPI, RandomUser.me.</p>" },
+                    { title: "11. Fetch API (Native)", content: "<p>Fungsi bawaan JS untuk networking. Berbasis Promise.</p><pre>fetch(url)</pre>" },
+                    { title: "12. Axios (Library)", content: "<p>Library pihak ketiga populer. Kelebihan: Sintaks lebih bersih, auto-JSON parsing, error handling lebih baik, interceptors.</p>" },
+                    { title: "13. Instalasi Axios", content: "<p><code>npm install axios</code>.</p>" },
+                    { title: "14. Konsep Async / Await", content: "<p>Cara modern menangani proses asinkron agar kode terlihat sinkron (berurutan) dan mudah dibaca.</p>" },
+                    { title: "15. Try-Catch Block", content: "<p>Penting untuk menangani error jaringan atau server down agar aplikasi tidak crash.</p>" },
+                    { title: "16. Security Dasar", content: "<p>Jangan hardcode API Key rahasia di kode frontend (React Native) karena bisa dibongkar (reverse engineer).</p>" },
+                    { title: "17. CORS (Cross-Origin Resource Sharing)", content: "<p>Masalah umum di Web, tapi biasanya tidak terjadi di Mobile Native, namun perlu dipahami.</p>" },
+                    { title: "18. Network Permission (Android)", content: "<p>Pastikan file <code>AndroidManifest.xml</code> memiliki izin INTERNET (default di Expo, manual di CLI).</p>" },
+                    { title: "19. Cleartext Traffic", content: "<p>Android memblokir request ke `http://` (non-secure) secara default. Harus `https://`.</p>" },
+                    { title: "20. Tugas Pertemuan 9", content: "<p>Install Postman. Lakukan uji coba request GET, POST, PUT, DELETE ke `https://jsonplaceholder.typicode.com/posts`.</p>" }
+                ]
+            },
+            "10": {
+                title: "Pertemuan 10: Fetching Data (GET Integration)",
+                desc: "Mengambil data dari server dan menampilkannya di aplikasi.",
+                slides: [
+                    { title: "1. Skenario Fetching", content: "<p>Kapan kita ambil data? Biasanya saat layar dibuka (Component Mount).</p>" },
+                    { title: "2. Pattern: Loading-Error-Success", content: "<p>UI harus menghandle 3 kondisi state: Sedang memuat, Gagal memuat, dan Berhasil tampil.</p>" },
+                    { title: "3. Implementasi State", content: "<p><code>const [data, setData] = useState([]);</code><br><code>const [loading, setLoading] = useState(true);</code></p>" },
+                    { title: "4. Fetch di useEffect", content: "<p>Panggil fungsi fetch di dalam useEffect dengan dependency kosong <code>[]</code> agar hanya jalan sekali.</p>" },
+                    { title: "5. Loading Indicator", content: "<p>Gunakan komponen <code>ActivityIndicator</code> bawaan RN saat state loading bernilai true.</p>" },
+                    { title: "6. Handling Empty State", content: "<p>Tampilan jika server merespon sukses tapi datanya kosong (Array length 0).</p>" },
+                    { title: "7. Axios GET Request", content: "<p><code>const response = await axios.get('url'); setData(response.data);</code></p>" },
+                    { title: "8. Menampilkan di FlatList", content: "<p>Menghubungkan state data API ke prop `data` milik FlatList.</p>" },
+                    { title: "9. Refresh Control", content: "<p>Menambahkan fitur tarik-untuk-segarkan agar user bisa memuat ulang data API.</p>" },
+                    { title: "10. Pagination (Load More)", content: "<p>Teknik mengambil data bertahap (page 1, page 2) saat user scroll ke bawah (onEndReached).</p>" },
+                    { title: "11. Search / Filter Server-side", content: "<p>Mengirim query param ke API. Contoh: <code>api.com/users?name=budi</code>.</p>" },
+                    { title: "12. Debouncing Search", content: "<p>Menunda request API saat user mengetik agar tidak spam request ke server setiap karakter.</p>" },
+                    { title: "13. Image Network", content: "<p>Menampilkan URL gambar dari respon API. Perhatikan styling size gambar wajib ada.</p>" },
+                    { title: "14. Skeleton Loading", content: "<p>Efek loading modern (kotak abu-abu berkedip) sebagai pengganti spinner putar agar UX lebih baik.</p>" },
+                    { title: "15. Error UI", content: "<p>Tampilan ramah user saat error (misal: 'Koneksi terputus') + Tombol 'Coba Lagi'.</p>" },
+                    { title: "16. Environment Variables", content: "<p>Simpan Base URL API di file config atau .env, jangan di-hardcode di setiap file.</p>" },
+                    { title: "17. Separating Service Layer", content: "<p>Best practice: Pisahkan logika API call di file `api.js` terpisah dari komponen UI.</p>" },
+                    { title: "18. Helper Function", content: "<p>Buat fungsi format currency atau format tanggal untuk merapikan data mentah API.</p>" },
+                    { title: "19. TypeScript Data Models", content: "<p>(Lanjutan) Membuat interface untuk respon API agar autocomplete berjalan.</p>" },
+                    { title: "20. Tugas Pertemuan 10", content: "<p>Buat aplikasi 'Katalog Berita'. Ambil data dari NewsAPI (atau dummy). Tampilkan Judul, Gambar, dan Deskripsi dalam list.</p>" }
+                ]
+            },
+            "11": {
+                title: "Pertemuan 11: Sending Data (POST/PUT/DELETE)",
+                desc: "Mengirim input pengguna ke server.",
+                slides: [
+                    { title: "1. Interaksi Dua Arah", content: "<p>Aplikasi tidak hanya baca data, tapi juga input data (Create, Update, Delete).</p>" },
+                    { title: "2. Form Handling", content: "<p>Mengumpulkan value dari banyak TextInput ke dalam satu state object.</p>" },
+                    { title: "3. Validasi Frontend", content: "<p>Cek input sebelum dikirim ke server (Email valid? Password minimal 8 karakter? Tidak boleh kosong?).</p>" },
+                    { title: "4. Axios POST", content: "<p><code>await axios.post('url', payloadData)</code>. Mengirim body data JSON.</p>" },
+                    { title: "5. Feedback UI saat Submit", content: "<p>Disable tombol submit dan tampilkan spinner saat proses pengiriman berlangsung.</p>" },
+                    { title: "6. Handling Success", content: "<p>Jika sukses 201 Created: Reset form, Tampilkan Toast/Alert sukses, Navigasi balik, atau Refresh list data sebelumnya.</p>" },
+                    { title: "7. Handling Validation Error (422)", content: "<p>Menangkap pesan error validasi dari server dan menampilkannya di bawah input terkait.</p>" },
+                    { title: "8. Edit Data (PUT/PATCH)", content: "<p>Biasanya layar form sama dengan Create, tapi field sudah terisi data lama, dan request ke endpoint ID.</p>" },
+                    { title: "9. Delete Data", content: "<p>Konfirmasi dialog (Alert) sebelum hapus. <code>axios.delete('url/id')</code>. Hapus item dari state lokal agar UI update instan.</p>" },
+                    { title: "10. Optimistic UI Update", content: "<p>Update UI *sebelum* server merespon sukses (agar terasa instan), rollback jika gagal.</p>" },
+                    { title: "11. Multipart/Form-Data", content: "<p>Tipe request khusus untuk upload file/gambar. Tidak bisa pakai JSON biasa.</p>" },
+                    { title: "12. Upload Gambar", content: "<p>Menggunakan `FormData`, append file uri, name, dan type.</p>" },
+                    { title: "13. Keyboard Handling di Form", content: "<p>Mengatur `returnKeyType` (next/done) dan `ref` agar user bisa pindah input pakai tombol enter keyboard.</p>" },
+                    { title: "14. Modal Input", content: "<p>Menggunakan Modal untuk form input popup sederhana.</p>" },
+                    { title: "15. Library Form", content: "<p>Pengenalan `React Hook Form` dan `Yup` untuk manajemen form kompleks yang lebih mudah.</p>" },
+                    { title: "16. Race Conditions", content: "<p>Mencegah user menekan tombol submit berkali-kali dengan cepat (double submit).</p>" },
+                    { title: "17. Token Authorization", content: "<p>Menyertakan token auth di header request POST (untuk rute terproteksi).</p>" },
+                    { title: "18. Global Loading Overlay", content: "<p>Teknik menampilkan loading yang menutup seluruh layar saat proses submit krusial.</p>" },
+                    { title: "19. Studi Kasus", content: "<p>Alur fitur 'Tambah Produk' lengkap dengan upload gambar.</p>" },
+                    { title: "20. Tugas Pertemuan 11", content: "<p>Lanjutkan tugas berita. Tambahkan fitur 'Posting Berita Baru' (Form Judul & Isi). Kirim ke API (simulasi POST).</p>" }
+                ]
+            },
+            "12": {
+                title: "Pertemuan 12: Backend as a Service (BaaS)",
+                desc: "Pengenalan Firebase sebagai solusi backend instan.",
+                slides: [
+                    { title: "1. Dilema Backend", content: "<p>Membuat custom backend (Node/PHP/Go) butuh waktu dan skill server. Solusi cepat: BaaS.</p>" },
+                    { title: "2. Apa itu Firebase?", content: "<p>Platform pengembangan aplikasi dari Google. Menyediakan Auth, Database, Storage, Hosting, dll.</p>" },
+                    { title: "3. Firebase vs REST API Biasa", content: "<p>Firebase seringkali menggunakan SDK realtime (WebSocket), bukan sekadar HTTP request standar.</p>" },
+                    { title: "4. Setup Firebase di RN", content: "<p>Membuat project di Firebase Console. Mengunduh `google-services.json`.</p>" },
+                    { title: "5. Library: React Native Firebase", content: "<p>Library resmi (`@react-native-firebase/app`). Membutuhkan setup native link.</p>" },
+                    { title: "6. JS SDK (Web) vs Native SDK", content: "<p>Di Expo Go standar, kita pakai JS SDK (v9 modular). Di Development Build/CLI, pakai Native SDK.</p>" },
+                    { title: "7. Authentication", content: "<p>Fitur Login mudah: Email/Pass, Google Sign-In, Phone Auth (OTP).</p>" },
+                    { title: "8. Firestore Database", content: "<p>Database NoSQL berbasis dokumen (Document-Collection). Sangat fleksibel.</p>" },
+                    { title: "9. Realtime Updates", content: "<p>Fitur unggulan Firestore. Data di aplikasi berubah otomatis saat data di server berubah (tanpa refresh).</p>" },
+                    { title: "10. Struktur Data NoSQL", content: "<p>Denormalisasi data. Berbeda dengan SQL (Relational). Hindari join kompleks.</p>" },
+                    { title: "11. CRUD di Firestore", content: "<p><code>addDoc</code>, <code>getDocs</code>, <code>updateDoc</code>, <code>deleteDoc</code>.</p>" },
+                    { title: "12. Security Rules", content: "<p>Mengamankan database di sisi server. Misal: Hanya user pemilik data yang bisa edit.</p>" },
+                    { title: "13. Firebase Storage", content: "<p>Tempat menyimpan file user (foto profil, upload gambar).</p>" },
+                    { title: "14. Analytics", content: "<p>Melacak perilaku pengguna aplikasi (Screen view, event tracking) gratis.</p>" },
+                    { title: "15. Crashlytics", content: "<p>Melaporkan crash aplikasi secara otomatis beserta log errornya.</p>" },
+                    { title: "16. Cloud Functions", content: "<p>Menjalankan kode backend (Node.js) triggernya dari event Firebase (Serverless).</p>" },
+                    { title: "17. Kelebihan & Kekurangan", content: "<p>Plus: Cepat develop, skalabel. Minus: Vendor lock-in, harga mahal jika skala masif.</p>" },
+                    { title: "18. Supabase (Alternatif)", content: "<p>Alternatif Open Source Firebase yang berbasis SQL (PostgreSQL).</p>" },
+                    { title: "19. Integrasi Auth di App", content: "<p>Membuat Context Auth untuk menyimpan status user login global.</p>" },
+                    { title: "20. Tugas Pertemuan 12", content: "<p>Buat project Firebase. Aktifkan Auth Email/Pass. Buat layar Login & Register di RN yang terhubung ke Firebase Auth.</p>" }
+                ]
+            },
+            "13": {
+                title: "Pertemuan 13: Local Persistence (AsyncStorage)",
+                desc: "Menyimpan data di perangkat pengguna.",
+                slides: [
+                    { title: "1. Mengapa Local Storage?", content: "<p>1. Menyimpan sesi login (Token).<br>2. Preferensi user (Tema, Bahasa).<br>3. Cache data offline.</p>" },
+                    { title: "2. AsyncStorage", content: "<p>Sistem penyimpanan Key-Value sederhana, asinkron, dan persisten (tetap ada meski app ditutup).</p>" },
+                    { title: "3. Instalasi", content: "<p><code>@react-native-async-storage/async-storage</code>. Sudah dipisah dari core RN.</p>" },
+                    { title: "4. Tipe Data String", content: "<p>AsyncStorage HANYA menyimpan string. Object/Array harus di-<code>JSON.stringify</code> saat simpan, dan <code>JSON.parse</code> saat baca.</p>" },
+                    { title: "5. Menyimpan Data", content: "<p><code>await AsyncStorage.setItem('user_token', 'abc-123')</code>.</p>" },
+                    { title: "6. Membaca Data", content: "<p><code>const val = await AsyncStorage.getItem('user_token')</code>. Return null jika key tidak ada.</p>" },
+                    { title: "7. Menghapus Data", content: "<p><code>removeItem</code> (satu key) atau <code>clear</code> (semua data app).</p>" },
+                    { title: "8. Kapan Menggunakan?", content: "<p>Gunakan untuk data kecil/sederhana. Jangan simpan database besar di sini (lambat).</p>" },
+                    { title: "9. SecureStore (Expo)", content: "<p>AsyncStorage TIDAK terenkripsi. Untuk password/token sensitif, gunakan <code>expo-secure-store</code> (Keychain iOS / Keystore Android).</p>" },
+                    { title: "10. Studi Kasus: Onboarding", content: "<p>Menampilkan slide intro hanya saat pertama kali install. Simpan flag <code>hasSeenIntro = true</code>.</p>" },
+                    { title: "11. Studi Kasus: Dark Mode", content: "<p>Simpan pilihan tema user. Load saat app start.</p>" },
+                    { title: "12. Persist State Library", content: "<p>Redux Persist atau library state manager lain yang otomatis sinkron ke storage.</p>" },
+                    { title: "13. Abstraksi Storage", content: "<p>Buat file helper `storage.js` agar jika ganti library storage, tidak perlu ubah semua kode komponen.</p>" },
+                    { title: "14. Limitasi Ukuran", content: "<p>Di Android ada batas ukuran (sekitar 6MB default). Bisa diperbesar tapi tidak disarankan.</p>" },
+                    { title: "15. SQLite (Alternatif)", content: "<p>Jika butuh query relasional kompleks di lokal, gunakan SQLite, bukan AsyncStorage.</p>" },
+                    { title: "16. MMKV (Alternatif)", content: "<p>Library storage pengganti AsyncStorage yang jauh lebih cepat (C++ based).</p>" },
+                    { title: "17. Error Handling", content: "<p>Selalu gunakan try-catch saat akses storage karena I/O disk bisa gagal.</p>" },
+                    { title: "18. Migrasi Data", content: "<p>Strategi update versi app jika struktur data simpanan berubah.</p>" },
+                    { title: "19. Debugging Storage", content: "<p>Melihat isi storage lewat React Native Debugger.</p>" },
+                    { title: "20. Tugas Pertemuan 13", content: "<p>Implementasi fitur 'Remember Me' di layar Login. Jika dicentang, simpan username di AsyncStorage.</p>" }
+                ]
+            },
+            "14": {
+                title: "Pertemuan 14: Offline First & Caching",
+                desc: "Membuat aplikasi tetap berguna tanpa koneksi internet.",
+                slides: [
+                    { title: "1. Tantangan Mobile Network", content: "<p>Koneksi lambat, terputus-putus, atau mode pesawat. User benci loading spinner abadi.</p>" },
+                    { title: "2. NetInfo API", content: "<p><code>@react-native-community/netinfo</code>. Mendeteksi status koneksi (Online/Offline/WiFi/Cellular).</p>" },
+                    { title: "3. UI Indikator Offline", content: "<p>Menampilkan banner 'Tidak ada koneksi internet' saat terdeteksi offline.</p>" },
+                    { title: "4. Strategi Caching: Network First", content: "<p>Coba ambil API. Jika sukses, simpan cache. Jika gagal/offline, tampilkan cache.</p>" },
+                    { title: "5. Strategi Caching: Cache First", content: "<p>Tampilkan cache dulu (instan!), lalu ambil API di background untuk update (Stale-While-Revalidate).</p>" },
+                    { title: "6. TanStack Query (React Query)", content: "<p>Library standar industri untuk manajemen server state & caching. Sangat disarankan dipelajari.</p>" },
+                    { title: "7. Fitur React Query", content: "<p>Auto caching, auto refetch on focus, deduping request, handling loading/error state otomatis.</p>" },
+                    { title: "8. Implementasi Manual", content: "<p>Simpan respon JSON API ke AsyncStorage dengan key URL endpoint.</p>" },
+                    { title: "9. Sinkronisasi Data", content: "<p>Menangani data yang dibuat user saat offline (Queue). Kirim antrian data saat online kembali.</p>" },
+                    { title: "10. Konflik Data", content: "<p>Apa yang terjadi jika data server berubah saat user edit offline? Strategi 'Last Write Wins' atau manual merge.</p>" },
+                    { title: "11. Optimasi Gambar Offline", content: "<p>Menggunakan library `react-native-fast-image` atau `expo-image` yang memiliki manajemen cache gambar agresif.</p>" },
+                    { title: "12. Preloading Data", content: "<p>Mengambil data layar berikutnya sebelum user menekannya (prefetching).</p>" },
+                    { title: "13. Database Lokal: Realm / WatermelonDB", content: "<p>Solusi database lokal reaktif untuk aplikasi offline-heavy yang kompleks.</p>" },
+                    { title: "14. UX Offline", content: "<p>Disable tombol submit yang butuh server, atau izinkan tapi beri indikator 'Pending Sync'.</p>" },
+                    { title: "15. Testing Offline", content: "<p>Simulasi kondisi offline lewat Developer Menu Android atau Network Link Conditioner iOS.</p>" },
+                    { title: "16. Background Fetch", content: "<p>Mengambil data di latar belakang bahkan saat aplikasi tidak aktif (membutuhkan konfigurasi native).</p>" },
+                    { title: "17. Ukuran Cache", content: "<p>Perlu mekanisme pembersihan cache lama (Garbage Collection) agar memori HP tidak penuh.</p>" },
+                    { title: "18. Persistence React Query", content: "<p>Plugin untuk menyimpan cache React Query ke AsyncStorage otomatis.</p>" },
+                    { title: "19. Studi Kasus: Aplikasi Catatan", content: "<p>Aplikasi bisa tulis catatan offline, tersimpan lokal, lalu sync ke cloud saat ada sinyal.</p>" },
+                    { title: "20. Tugas Pertemuan 14", content: "<p>Modifikasi aplikasi Berita/Katalog. Simpan data berita ke AsyncStorage. Saat dibuka tanpa internet, berita tetap tampil dari storage.</p>" }
+                ]
+            },
+            "15": {
+                title: "Pertemuan 15: Best Practices, Optimization & Deployment",
+                desc: "Membersihkan kode, optimasi performa, dan merilis aplikasi.",
+                slides: [
+                    { title: "1. Folder Structure", content: "<p>Pemisahan concerns: `/src/components`, `/src/screens`, `/src/services`, `/src/utils`, `/src/navigation`.</p>" },
+                    { title: "2. Performance: Render Count", content: "<p>Mencegah re-render yang tidak perlu. Gunakan `React.memo`, `useMemo`, dan `useCallback`.</p>" },
+                    { title: "3. Performance: List", content: "<p>Gunakan FlatList dengan benar (keyExtractor, getItemLayout). Hindari fungsi anonim di renderItem.</p>" },
+                    { title: "4. Performance: Images", content: "<p>Gunakan format WebP. Resize gambar di server, jangan kirim gambar 4K ke HP.</p>" },
+                    { title: "5. Hermès Engine", content: "<p>JavaScript engine optimasi dari Facebook untuk Android/iOS. Start-up time lebih cepat, APK lebih kecil.</p>" },
+                    { title: "6. Memory Leak", content: "<p>Bersihkan listener dan timer di `useEffect` cleanup function.</p>" },
+                    { title: "7. Linting & Formatting", content: "<p>Gunakan ESLint dan Prettier agar gaya kode konsisten dan mencegah bug sintaks.</p>" },
+                    { title: "8. TypeScript", content: "<p>Sangat disarankan untuk proyek skala menengah-besar untuk type safety.</p>" },
+                    { title: "9. Error Boundary", content: "<p>Komponen untuk menangkap crash JS di tree komponen anak agar aplikasi tidak layar putih total.</p>" },
+                    { title: "10. Environment Config", content: "<p><code>react-native-config</code>. Pisahkan config Development, Staging, dan Production.</p>" },
+                    { title: "11. App Icons & Splash Screen", content: "<p>Generate aset ikon untuk berbagai resolusi (ldpi, hdpi, xxhdpi). Expo memudahkan ini via `app.json`.</p>" },
+                    { title: "12. Signing APK/AAB (Android)", content: "<p>Membuat Keystore kunci digital. Wajib untuk upload ke Play Store. Jangan hilangkan kuncinya!</p>" },
+                    { title: "13. EAS Build (Expo)", content: "<p>Layanan cloud build dari Expo. <code>eas build -p android</code>.</p>" },
+                    { title: "14. Google Play Console", content: "<p>Proses upload App Bundle (.aab), mengisi listing toko, rating konten, dan kebijakan privasi.</p>" },
+                    { title: "15. Apple App Store Connect", content: "<p>Proses deploy iOS. Membutuhkan akun developer Apple ($99/tahun) dan sertifikat.</p>" },
+                    { title: "16. Over The Air (OTA) Updates", content: "<p>Expo Updates / CodePush. Update kode JS langsung ke user tanpa lewat review App Store.</p>" },
+                    { title: "17. Analytics & Crash Reporting", content: "<p>Integrasi Sentry atau Firebase Crashlytics sebelum rilis untuk monitor kesehatan app.</p>" },
+                    { title: "18. App Size Optimization", content: "<p>Analisa bundle visualizer. Hapus library besar yang tidak terpakai (misal: Moment.js -> date-fns).</p>" },
+                    { title: "19. CI/CD", content: "<p>Automasi testing dan build menggunakan GitHub Actions.</p>" },
+                    { title: "20. Tugas Pertemuan 15", content: "<p>Lakukan build APK (Android) dari proyek akhir Anda (bisa pakai EAS Build free tier) dan instal di HP sendiri.</p>" }
+                ]
+            },
+            "16": {
+                title: "Pertemuan 16: Ujian Akhir Semester (UAS)",
+                desc: "Evaluasi akhir berupa presentasi proyek aplikasi lengkap.",
+                slides: [
+                    { title: "1. Ketentuan UAS", content: "<p>UAS berbentuk Final Project yang dikerjakan secara individu/kelompok (sesuai kontrak).</p>" },
+                    { title: "2. Lingkup Materi", content: "<p>Seluruh materi dari Pertemuan 1 s.d. 15 diintegrasikan dalam satu aplikasi.</p>" },
+                    { title: "3. Syarat Wajib 1: Navigasi", content: "<p>Aplikasi harus menggunakan kombinasi Stack dan Tab/Drawer Navigator.</p>" },
+                    { title: "4. Syarat Wajib 2: Networking", content: "<p>Aplikasi harus terhubung ke API Publik atau Backend sendiri (GET & POST).</p>" },
+                    { title: "5. Syarat Wajib 3: State Management", content: "<p>Penggunaan Hooks (useState, useEffect) yang tepat, atau Context API.</p>" },
+                    { title: "6. Syarat Wajib 4: Offline Support", content: "<p>Minimal ada fitur simpan data lokal (AsyncStorage) atau caching sederhana.</p>" },
+                    { title: "7. Syarat Wajib 5: UI/UX", content: "<p>Desain rapi, konsisten, menggunakan aset gambar/ikon yang sesuai, handling loading/error.</p>" },
+                    { title: "8. Ide Proyek: E-Commerce Sederhana", content: "<p>List produk, Detail, Keranjang (Lokal), Checkout (Simulasi).</p>" },
+                    { title: "9. Ide Proyek: Movie App", content: "<p>List film (TMDB API), Search, Detail, Favorit (Lokal).</p>" },
+                    { title: "10. Ide Proyek: Portal Berita", content: "<p>Kategori berita, baca detail, bookmark berita.</p>" },
+                    { title: "11. Ide Proyek: Task Management", content: "<p>CRUD task, deadline, status priority, simpan lokal/firebase.</p>" },
+                    { title: "12. Penilaian Presentasi", content: "<p>Kemampuan menjelaskan kode dan alur aplikasi. Demo langsung di perangkat/emulator.</p>" },
+                    { title: "13. Penilaian Tanya Jawab", content: "<p>Pemahaman terhadap struktur kode yang ditulis (untuk memastikan tidak joki).</p>" },
+                    { title: "14. Kode Etik", content: "<p>Dilarang keras menggunakan template jadi full-app tanpa modifikasi signifikan.</p>" },
+                    { title: "15. Deliverables", content: "<p>1. Source Code (Zip/Git).<br>2. File APK (Android).<br>3. Dokumen Laporan (PDF).</p>" },
+                    { title: "16. Struktur Laporan", content: "<p>Pendahuluan, Deskripsi Fitur, Screenshot Aplikasi, Penjelasan Teknis Utama.</p>" },
+                    { title: "17. Batas Waktu", content: "<p>Dikumpulkan sesuai jadwal ujian yang ditetapkan fakultas.</p>" },
+                    { title: "18. Bonus Nilai", content: "<p>Fitur tambahan: Push Notification, Maps, Camera, atau Animasi kompleks.</p>" },
+                    { title: "19. Harapan Pasca Kuliah", content: "<p>Mahasiswa mampu membuat aplikasi mobile sendiri dan siap terjun ke industri sebagai Junior Mobile Dev.</p>" },
+                    { title: "20. Penutup Perkuliahan", content: "<p>Terima kasih atas partisipasinya selama satu semester. Jangan berhenti belajar karena teknologi mobile bergerak sangat cepat!</p>" }
+                ]
+            }
+        };
+
+        // --- Logika UI ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const homeView = document.getElementById('home-view');
+            const homeGrid = homeView.querySelector('.grid'); // Container grid
+            const materiView = document.getElementById('materi-view');
+            const materiTitleSticky = document.getElementById('materi-title-sticky');
+            const materiContent = document.getElementById('materi-content');
+            const backButton = document.getElementById('back-button');
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            // 1. Generate Daftar Pertemuan di Halaman Utama (agar HTML lebih bersih)
+            Object.keys(materiData).forEach(key => {
+                const data = materiData[key];
+                const isExam = key === '8' || key === '16';
+                
+                // Style beda untuk UTS/UAS
+                const cardClass = isExam 
+                    ? 'border-orange-200 bg-orange-50 hover:border-orange-400' 
+                    : 'border-slate-200 hover:border-blue-300';
+                const badgeClass = isExam
+                    ? 'bg-orange-100 text-orange-700'
+                    : 'bg-blue-100 text-blue-700';
+
+                const html = `
+                <a href="#" class="pertemuan-card group ${cardClass} p-6" data-pertemuan="${key}">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs font-bold px-2 py-1 rounded ${badgeClass}">Pertemuan ${key}</span>
+                        ${isExam ? '<span class="text-lg">🎓</span>' : '<span class="text-lg text-slate-300 group-hover:text-blue-500">→</span>'}
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-blue-700 transition-colors">${data.title.replace(/Pertemuan \d+: /, '')}</h3>
+                    <p class="text-sm text-slate-500 line-clamp-3">${data.desc}</p>
+                    <div class="mt-auto pt-4 flex items-center text-xs text-slate-400 font-medium">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        20 Slide Materi
+                    </div>
+                </a>
+                `;
+                homeGrid.insertAdjacentHTML('beforeend', html);
+            });
+
+            // 2. Event Listener Klik Pertemuan
+            homeGrid.addEventListener('click', (event) => {
+                const card = event.target.closest('.pertemuan-card');
+                if (card) {
+                    event.preventDefault();
+                    const id = card.dataset.pertemuan;
+                    loadMateri(id);
+                }
+            });
+
+            // 3. Event Listener Back Button
+            backButton.addEventListener('click', showHome);
+
+            // 4. Scroll Spy untuk Back To Top
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+
+            // Fungsi Load Materi
+            function loadMateri(id) {
+                const data = materiData[id];
+                if (!data) return;
+
+                // Update Header Sticky
+                materiTitleSticky.textContent = data.title;
+
+                // Render Slides
+                materiContent.innerHTML = '';
+                data.slides.forEach((slide, index) => {
+                    const slideNum = index + 1;
+                    const slideHTML = `
+                        <div class="slide">
+                            <span class="slide-number">Slide ${slideNum} / 20</span>
+                            <h3 class="slide-title">${slide.title}</h3>
+                            <div class="slide-body">
+                                ${slide.content}
+                            </div>
+                        </div>
+                    `;
+                    materiContent.insertAdjacentHTML('beforeend', slideHTML);
+                });
+
+                // Transisi View
+                homeView.classList.add('hidden');
+                materiView.classList.remove('hidden');
+                window.scrollTo(0, 0);
+            }
+
+            // Fungsi Show Home
+            function showHome() {
+                materiView.classList.add('hidden');
+                homeView.classList.remove('hidden');
+                materiContent.innerHTML = ''; // Clean up
+                window.scrollTo(0, 0);
+            }
+        });
+    </script>
+</body>
+</html>
